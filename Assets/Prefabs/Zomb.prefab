@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7852725126999034702}
   - component: {fileID: 7006224868547883685}
   - component: {fileID: 384938308896943365}
+  - component: {fileID: 5307933663944180877}
   m_Layer: 12
   m_Name: Zomb
   m_TagString: Untagged
@@ -126,3 +127,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Target
   maxHealth: 100
+--- !u!114 &5307933663944180877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 637282554920787213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec3db5b63eb46aa4388794520e392cc6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZombMovement
+  targetTransform: {fileID: 0}
+  moveSpeed: 1
+  stopAtTarget: 1
+  stoppingDistance: 0.2
