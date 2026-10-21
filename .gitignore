@@ -1,0 +1,17 @@
+/[Ll]ibrary/
+/[Ll]ogs/
+/[Tt]emp/
+/[Oo]bj/
+/[Mm]emoryCaptures/
+/[Rr]oot/[Ll]ibrary/
+/[Bb]uild/
+/[Bb]uilds/
+/UserSettings/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
