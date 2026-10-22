@@ -5,22 +5,16 @@ public class ZombMovement : MonoBehaviour
 {
     [Header("Hareket Ayarlarý")]
     public float moveSpeed = 3.5f;
-    public bool stopAtTarget = true;
-    public float stoppingDistance = 0.2f;
 
     private Transform targetTransform;
+    private float stoppingDistance = 3.0f;  // Merkezden otomatik alýnacak
     private bool isMoving = false;
     private Rigidbody rb;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
-
-        // Zombinin çarpýþmada devrilmesini (yere kapaklanmasýný) önler
         rb.freezeRotation = true;
-
-        // Yerçekiminden etkilenmesini istemiyorsanýz (örneðin düz zeminde yürüyorlarsa) kapatabilirsiniz:
-        // rb.useGravity = false; 
     }
 
     public void SetTarget(Transform newTarget)
@@ -30,8 +24,15 @@ public class ZombMovement : MonoBehaviour
 
         if (targetTransform != null)
         {
+            // MERKEZDEKÝ YARIÇAPI OTOMATÝK OKU
+            CenterBase centerBase = targetTransform.GetComponent<CenterBase>();
+            if (centerBase != null)
+            {
+                stoppingDistance = centerBase.Radius; // Artýk merkezde ne yazýyorsa o geçerli!
+            }
+
             Vector3 direction = (targetTransform.position - transform.position).normalized;
-            direction.y = 0; // Sadece yatayda dön
+            direction.y = 0;
 
             if (direction != Vector3.zero)
             {
@@ -45,23 +46,31 @@ public class ZombMovement : MonoBehaviour
         if (!isMoving || targetTransform == null) return;
 
         Vector3 targetPosition = targetTransform.position;
-        targetPosition.y = transform.position.y; // Yükseklik farkýndan etkilenmemesi için
+        targetPosition.y = transform.position.y;
 
-        // Rigidbody.MovePosition kullanarak fizik motorunu ezmeden güvenle ilerletiyoruz
-        // Bu sayede hem çarpýþmalar (colliders) aktif çalýþýr hem de titreme olmaz.
+        // Hedefe doðru ilerlet
         Vector3 newPosition = Vector3.MoveTowards(rb.position, targetPosition, moveSpeed * Time.fixedDeltaTime);
         rb.MovePosition(newPosition);
 
-        // Hedefe varýþ kontrolü
-        if (stopAtTarget && Vector3.Distance(rb.position, targetPosition) <= stoppingDistance)
+        // Merkezden gelen yarýçap mesafesine girip girmediðini kontrol et
+        if (Vector3.Distance(rb.position, targetPosition) <= stoppingDistance)
         {
-            OnReachedTarget();
+            ReachCenter();
         }
     }
 
-    void OnReachedTarget()
+    void ReachCenter()
     {
         isMoving = false;
-        gameObject.SetActive(false); // Object Pooling için pasife al
+
+        Target myTargetComponent = GetComponent<Target>();
+        if (myTargetComponent != null)
+        {
+            myTargetComponent.ReachCenter();
+        }
+        else
+        {
+            gameObject.SetActive(false);
+        }
     }
 }

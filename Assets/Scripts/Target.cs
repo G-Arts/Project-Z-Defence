@@ -3,26 +3,28 @@ using UnityEngine;
 
 public class Target : MonoBehaviour
 {
-    [SerializeField] private float maxHealth = 50f;
+    [Header("Zombi/Hedef Özellikleri (Her tür için ayrý ayarlanabilir)")]
+    [SerializeField] private float maxHealth = 50f;         // Bu zombinin caný
+    [SerializeField] private int goldReward = 10;           // Öldüðünde vereceði altýn
+    [SerializeField] private float damageToCenter = 10f;    // Merkeze ulaþtýðýnda vereceði hasar
+
     private float currentHealth;
 
     [Header("Hit Effect Settings")]
-    [SerializeField] private Renderer targetRenderer; // Nesnenin MeshRenderer bileþeni
-    [SerializeField] private Color hitColor = Color.white; // Vurulduðunda alacaðý renk
-    [SerializeField] private float flashDuration = 0.1f; // Beyaz kalma süresi
+    [SerializeField] private Renderer targetRenderer;
+    [SerializeField] private Color hitColor = Color.white;
+    [SerializeField] private float flashDuration = 0.1f;
 
     private Color originalColor;
     private Coroutine flashCoroutine;
 
     private void Awake()
     {
-        // Eðer Inspector'dan atanmadýysa otomatik bulmaya çalýþ
         if (targetRenderer == null)
         {
             targetRenderer = GetComponent<Renderer>();
         }
 
-        // Malzemenin orijinal rengini sakla (Material property block kullanmak materyal kopyalanmasýný önler)
         if (targetRenderer != null)
         {
             originalColor = targetRenderer.material.color;
@@ -31,9 +33,9 @@ public class Target : MonoBehaviour
 
     private void OnEnable()
     {
+        // Havuzdan her çýktýðýnda bu türe özel can ile baþlar
         currentHealth = maxHealth;
 
-        // Havuzdan tekrar çýktýðýnda rengin orijinal olduðundan emin olalým
         if (targetRenderer != null)
         {
             targetRenderer.material.color = originalColor;
@@ -43,6 +45,7 @@ public class Target : MonoBehaviour
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
+        currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
 
         // Vurulma efektini tetikle
         if (targetRenderer != null)
@@ -54,7 +57,6 @@ public class Target : MonoBehaviour
             flashCoroutine = StartCoroutine(FlashRoutine());
         }
 
-        // Doðrulama: Canýn 0'a ulaþýp ulaþmadýðýný kontrol et
         if (currentHealth <= 0f)
         {
             Die();
@@ -63,26 +65,37 @@ public class Target : MonoBehaviour
 
     private IEnumerator FlashRoutine()
     {
-        // Rengi vurulma rengine (beyaza) çevir
         targetRenderer.material.color = hitColor;
-
-        // Belirtilen süre kadar bekle
         yield return new WaitForSeconds(flashDuration);
-
-        // Orijinal rengine geri döndür
         targetRenderer.material.color = originalColor;
     }
 
     private void Die()
     {
-        // Eðer nesne ölürken hala yanýp sönme coroutine'i çalýþýyorsa durdur
         if (flashCoroutine != null)
         {
             StopCoroutine(flashCoroutine);
             targetRenderer.material.color = originalColor;
         }
 
-        // Object Pooling uyumlu: Destroy yerine objeyi kapatýyoruz (pasif yapýyoruz)
+        // GameManager'a bu zombiye özel altýn ödülünü bildiriyoruz
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.AddGold(goldReward);
+        }
+
+        // Object Pooling uyumlu: Pasif yap
         gameObject.SetActive(false);
+    }
+
+    // Zombi merkeze ulaþtýðýnda bu fonksiyon çaðrýlacak ve kendi hasar miktarýný merkeze iþleyecek
+    public void ReachCenter()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.DamageBase(damageToCenter);
+        }
+
+        gameObject.SetActive(false); // Merkeze varýnca da havuz için pasif yap
     }
 }
