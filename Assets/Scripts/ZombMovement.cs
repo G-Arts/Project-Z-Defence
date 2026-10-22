@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class ZombMovement : MonoBehaviour
 {
     [Header("Hareket Ayarlarý")]
@@ -9,8 +10,19 @@ public class ZombMovement : MonoBehaviour
 
     private Transform targetTransform;
     private bool isMoving = false;
+    private Rigidbody rb;
 
-    // Hedef atandýðýnda veya deðiþtiðinde bir kez çalýþýr
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+
+        // Zombinin çarpýþmada devrilmesini (yere kapaklanmasýný) önler
+        rb.freezeRotation = true;
+
+        // Yerçekiminden etkilenmesini istemiyorsanýz (örneðin düz zeminde yürüyorlarsa) kapatabilirsiniz:
+        // rb.useGravity = false; 
+    }
+
     public void SetTarget(Transform newTarget)
     {
         targetTransform = newTarget;
@@ -18,9 +30,8 @@ public class ZombMovement : MonoBehaviour
 
         if (targetTransform != null)
         {
-            // Dönme iþlemini sadece hedef belirlendiðinde BÝR KEZ yapýyoruz
             Vector3 direction = (targetTransform.position - transform.position).normalized;
-            direction.y = 0; // Y ekseninde dönmeyi sabitlemek için (isteðe baðlý)
+            direction.y = 0; // Sadece yatayda dön
 
             if (direction != Vector3.zero)
             {
@@ -29,17 +40,20 @@ public class ZombMovement : MonoBehaviour
         }
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (!isMoving || targetTransform == null) return;
 
         Vector3 targetPosition = targetTransform.position;
+        targetPosition.y = transform.position.y; // Yükseklik farkýndan etkilenmemesi için
 
-        // Düþmaný direkt hedefe doðru ilerlet (Her karede dönme hesaplamasý yapýlmaz)
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
+        // Rigidbody.MovePosition kullanarak fizik motorunu ezmeden güvenle ilerletiyoruz
+        // Bu sayede hem çarpýþmalar (colliders) aktif çalýþýr hem de titreme olmaz.
+        Vector3 newPosition = Vector3.MoveTowards(rb.position, targetPosition, moveSpeed * Time.fixedDeltaTime);
+        rb.MovePosition(newPosition);
 
-        // Hedefe varýp varmadýðýný kontrol et
-        if (stopAtTarget && Vector3.Distance(transform.position, targetPosition) <= stoppingDistance)
+        // Hedefe varýþ kontrolü
+        if (stopAtTarget && Vector3.Distance(rb.position, targetPosition) <= stoppingDistance)
         {
             OnReachedTarget();
         }
@@ -48,8 +62,6 @@ public class ZombMovement : MonoBehaviour
     void OnReachedTarget()
     {
         isMoving = false;
-
-        // Object Pooling kullandýðýmýz için Destroy yerine objeyi kapatýyoruz (Pasif yapýyoruz)
-        gameObject.SetActive(false);
+        gameObject.SetActive(false); // Object Pooling için pasife al
     }
 }

@@ -5,7 +5,8 @@ public class Target : MonoBehaviour
     [SerializeField] private float maxHealth = 50f;
     private float currentHealth;
 
-    private void Awake()
+    // Havuzdan her aktif edildiðinde (sahneye çýktýðýnda) caný yenile
+    private void OnEnable()
     {
         currentHealth = maxHealth;
     }
@@ -23,6 +24,7 @@ public class Target : MonoBehaviour
 
     private void Die()
     {
-        Destroy(gameObject);
+        // Object Pooling uyumlu: Destroy yerine objeyi kapatýyoruz (pasif yapýyoruz)
+        gameObject.SetActive(false);
     }
 }
