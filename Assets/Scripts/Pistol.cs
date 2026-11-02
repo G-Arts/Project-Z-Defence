@@ -3,61 +3,76 @@ using UnityEngine;
 public class Pistol : WeaponBase
 {
     [Header("Tabanca Özel Ayarlarý")]
-    [SerializeField] private float range = 50f;          // Atýþ menzili
-    [SerializeField] private LayerMask hitMask;        // Raycast'in çarpacaðý katmanlar (Zombiler vb.)
-    [SerializeField] private Transform firePoint;      // Merminin çýktýðý namlu ucu
+    [SerializeField] private float range = 50f;
+    [SerializeField] private LayerMask hitMask;
+    [SerializeField] private Transform firePoint;      // Silahýn namlu ucu
 
-    // WeaponBase'den miras aldýðýmýz Shoot metodunu tabancaya göre özelleþtiriyoruz
     public override void Shoot()
     {
-        // Ateþ hýzý (FireRate) kontrolü - Seri týklamalarda spam yapýlmasýný önler
         if (Time.time < nextFireTime) return;
 
-        // Mermi kontrolü: Eðer sonsuz mermili deðilse ve þarjörde mermi kalmadýysa ateþ etme
         if (currentAmmo <= 0)
         {
             Debug.Log("Þarjör bitti! R tuþuna basarak þarjör deðiþtirin.");
-            // Ýleride buraya "týk týk" boþ silah ses efekti eklenebilir
             return;
         }
 
-        // Sonraki ateþ için zamaný güncelle
         nextFireTime = Time.time + fireRate;
-
-        // Sonsuz mermili deðilse þarjörden 1 mermi düþ
-        if (!hasInfiniteAmmo)
-        {
-            currentAmmo--;
-        }
+        currentAmmo--;
 
         Debug.Log($"[TABANCA] Ateþlendi! Þarjördeki Mermi: {currentAmmo} / {magazineSize}");
 
-        // Görsel veya Fiziksel Vuruþ Kontrolü (Raycast)
-        PerformShootRaycast();
+        if (ownerInventory != null)
+        {
+            ownerInventory.NotifyWeaponDataChanged();
+        }
+
+        PerformHybridShootRaycast();
     }
 
-    private void PerformShootRaycast()
+    // --- PROFESYONEL HÝBRÝT RAYCAST (FPS & TPS Uyumlu) ---
+    private void PerformHybridShootRaycast()
     {
-        // Namlu veya kamera yönünden ileriye doðru ray gönderiyoruz
-        Transform shootOrigin = firePoint != null ? firePoint : transform;
+        // 1. Adým: Kameranýn merkezinden (ekranýn ortasýndan) ileriye doðru ray atýyoruz
+        Camera mainCam = Camera.main;
+        if (mainCam == null) return;
 
-        RaycastHit hit;
-        if (Physics.Raycast(shootOrigin.position, shootOrigin.forward, out hit, range, hitMask))
+        Vector3 rayOrigin = mainCam.transform.position;
+        Vector3 rayDirection = mainCam.transform.forward;
+
+        Vector3 targetPoint;
+
+        // Kameranýn gönderdiði ray bir þeye çarpýyor mu?
+        RaycastHit screenCenterHit;
+        if (Physics.Raycast(rayOrigin, rayDirection, out screenCenterHit, range, hitMask))
         {
-            Debug.Log($"Vurulan Obje: {hit.collider.name}");
+            // Çarptýðý nokta bizim hedef noktamýzdýr
+            targetPoint = screenCenterHit.point;
+        }
+        else
+        {
+            // Hiçbir þeye çarpmadýysa menzilin sonundaki noktayý hedef al
+            targetPoint = rayOrigin + (rayDirection * range);
+        }
 
-            // Çarpýlan objede Target bileþeni var mý kontrol et (Zombi mi?)
-            Target enemyTarget = hit.collider.GetComponent<Target>();
+        // 2. Adým: Mermiyi namlu ucundan (firePoint) baþlatýp, bulduðumuz hedef noktasýna doðru gönderiyoruz
+        Transform shootOrigin = firePoint != null ? firePoint : transform;
+        Vector3 directionToTarget = (targetPoint - shootOrigin.position).normalized;
+
+        RaycastHit shotHit;
+        if (Physics.Raycast(shootOrigin.position, directionToTarget, out shotHit, range, hitMask))
+        {
+            Debug.Log($"Vurulan Obje: {shotHit.collider.name}");
+
+            Target enemyTarget = shotHit.collider.GetComponent<Target>();
             if (enemyTarget != null)
             {
-                // Zombiye hasar ver
                 enemyTarget.TakeDamage(damage);
             }
 
-            // Vurulan objede Rigidbody varsa fiziksel tepki/itme uygula
-            if (hit.rigidbody != null)
+            if (shotHit.rigidbody != null)
             {
-                hit.rigidbody.AddForce(-hit.normal * impactForce, ForceMode.Impulse);
+                shotHit.rigidbody.AddForce(-shotHit.normal * impactForce, ForceMode.Impulse);
             }
         }
     }

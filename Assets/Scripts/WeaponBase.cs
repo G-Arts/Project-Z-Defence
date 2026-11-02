@@ -17,6 +17,8 @@ public abstract class WeaponBase : MonoBehaviour
 
     protected float nextFireTime;
 
+    [HideInInspector] public PlayerInventory ownerInventory; // Bu silahýn ait olduðu envanter
+
     // Nadirliðe göre renk döndüren yardýmcý özellik (UI ve Kutu rengi için)
     public Color GetRarityColor()
     {
@@ -41,14 +43,12 @@ public abstract class WeaponBase : MonoBehaviour
     // Þarjör deðiþtirme mekaniði
     public virtual void Reload()
     {
-        // Þarjör zaten doluysa çýk
         if (currentAmmo >= magazineSize)
             return;
 
         if (hasInfiniteAmmo)
         {
             currentAmmo = magazineSize;
-
             Debug.Log($"{weaponName} yeniden dolduruldu. (Sonsuz yedek mermi)");
             return;
         }

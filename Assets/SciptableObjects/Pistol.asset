@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50c7940a16690d54daee2f368fe40326, type: 3}
+  m_Name: Pistol
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  weaponName: Pistol
+  rarity: 0
+  weaponIcon: {fileID: 21300000, guid: 433e25d35d3199840a3234bf796dd6c8, type: 3}
+  weaponPrefab: {fileID: 4557656970880324421, guid: 3975b930fb0348646bc9ca7143396fe0, type: 3}
+  damage: 20
+  fireRate: 0.15
+  impactForce: 30
+  range: 50
+  magazineSize: 30
+  totalAmmoReserve: 90
+  hasInfiniteAmmo: 1
