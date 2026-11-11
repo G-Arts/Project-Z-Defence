@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
@@ -21,18 +20,14 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float staminaRegenRate = 10f;
     [SerializeField] private float sprintStaminaThreshold = 10f;
 
-    // Input System Deðiþkenleri
-    private InputAction moveAction;
-    private InputAction jumpAction;
-    private InputAction sprintAction;
+    // Ýç Deðiþkenler (Girdiler PlayerInputHandler tarafýndan beslenir)
+    private Vector2 moveInput;
+    private bool isSprinting;
+    private bool jumpRequested;
 
-    // Ýç Deðiþkenler
     private float currentSpeed;
     private float currentStamina;
     private bool isGrounded;
-    private bool isSprinting;
-    private bool jumpRequested;
-    private Vector2 moveInput;
     private Vector3 velocity;
 
     private CharacterController controller;
@@ -42,64 +37,25 @@ public class PlayerMovement : MonoBehaviour
         controller = GetComponent<CharacterController>();
         currentSpeed = walkSpeed;
         currentStamina = maxStamina;
-
-        // Kod üzerinden Input Action'larý tanýmlýyoruz
-        moveAction = new InputAction("Move", InputActionType.Value, expectedControlType: "Vector2");
-        moveAction.AddCompositeBinding("2DVector")
-            .With("Up", "<Keyboard>/w")
-            .With("Down", "<Keyboard>/s")
-            .With("Left", "<Keyboard>/a")
-            .With("Right", "<Keyboard>/d");
-        moveAction.AddBinding("<Gamepad>/leftStick");
-
-        jumpAction = new InputAction("Jump", InputActionType.Button, "<Keyboard>/space");
-        jumpAction.AddBinding("<Gamepad>/buttonSouth");
-
-        sprintAction = new InputAction("Sprint", InputActionType.Button, "<Keyboard>/leftShift");
-        sprintAction.AddBinding("<Gamepad>/leftTrigger");
     }
 
-    private void OnEnable()
+    // --- PLAYERINPUTHANDLER TARAFINDAN ÇAÐRILAN GÝRDÝ METOTLARI ---
+    public void SetMoveInput(Vector2 input)
     {
-        moveAction.Enable();
-        jumpAction.Enable();
-        sprintAction.Enable();
-
-        // Olaylarý (Callbacks) baðlýyoruz
-        jumpAction.performed += OnJumpPerformed;
-        sprintAction.performed += OnSprintPerformed;
-        sprintAction.canceled += OnSprintCanceled;
+        moveInput = input;
     }
 
-    private void OnDisable()
+    public void SetSprinting(bool sprinting)
     {
-        // Olaylarý temizliyoruz
-        jumpAction.performed -= OnJumpPerformed;
-        sprintAction.performed -= OnSprintPerformed;
-        sprintAction.canceled -= OnSprintCanceled;
-
-        moveAction.Disable();
-        jumpAction.Disable();
-        sprintAction.Disable();
+        isSprinting = sprinting;
     }
 
-    private void OnJumpPerformed(InputAction.CallbackContext context)
+    public void RequestJump()
     {
-        // Space tuþuna basýldýðý an tetiklenir
         if (isGrounded)
         {
             jumpRequested = true;
         }
-    }
-
-    private void OnSprintPerformed(InputAction.CallbackContext context)
-    {
-        isSprinting = true;
-    }
-
-    private void OnSprintCanceled(InputAction.CallbackContext context)
-    {
-        isSprinting = false;
     }
 
     private void Update()
@@ -114,10 +70,7 @@ public class PlayerMovement : MonoBehaviour
             velocity.y = -2f;
         }
 
-        // 2. Hareket Girdisini Al
-        moveInput = moveAction.ReadValue<Vector2>();
-
-        // 3. Enerji ve Koþma Mantýðý
+        // 2. Enerji ve Koþma Mantýðý
         bool isMoving = moveInput.sqrMagnitude > 0.01f;
 
         if (isSprinting && isMoving && isGrounded && currentStamina > sprintStaminaThreshold)
@@ -125,10 +78,7 @@ public class PlayerMovement : MonoBehaviour
             currentSpeed = sprintSpeed;
             currentStamina -= staminaDrainRate * Time.deltaTime;
 
-            if (currentStamina <= 0f)
-            {
-                currentStamina = 0f;
-            }
+            if (currentStamina <= 0f) currentStamina = 0f;
         }
         else
         {
@@ -141,18 +91,18 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        // 4. Yatay Hareket
+        // 3. Yatay Hareket
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
         controller.Move(move * currentSpeed * Time.deltaTime);
 
-        // 5. Zýplama Uygulama
+        // 4. Zýplama Uygulama
         if (jumpRequested)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             jumpRequested = false;
         }
 
-        // 6. Yerçekimi Uygulama
+        // 5. Yerçekimi Uygulama
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
     }

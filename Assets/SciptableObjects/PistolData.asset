@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 50c7940a16690d54daee2f368fe40326, type: 3}
-  m_Name: Pistol
+  m_Name: PistolData
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   weaponName: Pistol
   rarity: 0
   weaponIcon: {fileID: 21300000, guid: 433e25d35d3199840a3234bf796dd6c8, type: 3}
-  weaponPrefab: {fileID: 4557656970880324421, guid: 3975b930fb0348646bc9ca7143396fe0, type: 3}
+  weaponPrefab: {fileID: 4818476601254733916, guid: 1fbbdf3c49d6ffd48b6dd1675dfc3108, type: 3}
   damage: 20
   fireRate: 0.15
   impactForce: 30

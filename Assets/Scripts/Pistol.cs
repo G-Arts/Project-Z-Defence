@@ -4,12 +4,12 @@ public class Pistol : WeaponBase
 {
     [Header("Tabanca Özel Ayarlarý")]
     [SerializeField] private float range = 50f;
-    [SerializeField] private LayerMask hitMask;
-    [SerializeField] private Transform firePoint;      // Silahýn namlu ucu
+    [SerializeField] private LayerMask hitMask = ~0;
+    [SerializeField] private Transform firePoint;
 
     public override void Shoot()
     {
-        if (Time.time < nextFireTime) return;
+        if (isReloading || Time.time < nextFireTime) return;
 
         if (currentAmmo <= 0)
         {
@@ -30,10 +30,8 @@ public class Pistol : WeaponBase
         PerformHybridShootRaycast();
     }
 
-    // --- PROFESYONEL HÝBRÝT RAYCAST (FPS & TPS Uyumlu) ---
     private void PerformHybridShootRaycast()
     {
-        // 1. Adým: Kameranýn merkezinden (ekranýn ortasýndan) ileriye doðru ray atýyoruz
         Camera mainCam = Camera.main;
         if (mainCam == null) return;
 
@@ -42,25 +40,19 @@ public class Pistol : WeaponBase
 
         Vector3 targetPoint;
 
-        // Kameranýn gönderdiði ray bir þeye çarpýyor mu?
-        RaycastHit screenCenterHit;
-        if (Physics.Raycast(rayOrigin, rayDirection, out screenCenterHit, range, hitMask))
+        if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit screenCenterHit, range, hitMask))
         {
-            // Çarptýðý nokta bizim hedef noktamýzdýr
             targetPoint = screenCenterHit.point;
         }
         else
         {
-            // Hiçbir þeye çarpmadýysa menzilin sonundaki noktayý hedef al
             targetPoint = rayOrigin + (rayDirection * range);
         }
 
-        // 2. Adým: Mermiyi namlu ucundan (firePoint) baþlatýp, bulduðumuz hedef noktasýna doðru gönderiyoruz
         Transform shootOrigin = firePoint != null ? firePoint : transform;
         Vector3 directionToTarget = (targetPoint - shootOrigin.position).normalized;
 
-        RaycastHit shotHit;
-        if (Physics.Raycast(shootOrigin.position, directionToTarget, out shotHit, range, hitMask))
+        if (Physics.Raycast(shootOrigin.position, directionToTarget, out RaycastHit shotHit, range, hitMask))
         {
             Debug.Log($"Vurulan Obje: {shotHit.collider.name}");
 

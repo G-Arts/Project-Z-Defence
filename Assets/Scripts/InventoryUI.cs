@@ -20,6 +20,15 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private Color normalColor = Color.gray;
     [SerializeField] private Color selectedColor = Color.yellow;
 
+    private void Start()
+    {
+        // Oyun açýldýðýnda envanterdeki verileri UI'ya zorla yenilet
+        if (playerInventory != null)
+        {
+            playerInventory.NotifyWeaponDataChanged();
+        }
+    }
+
     private void OnEnable()
     {
         if (playerInventory != null)
@@ -67,6 +76,7 @@ public class InventoryUI : MonoBehaviour
             }
             else
             {
+                // Silah olmayan slotlarda ikon kutusunu gizliyoruz
                 slots[index].weaponIcon.gameObject.SetActive(false);
             }
         }

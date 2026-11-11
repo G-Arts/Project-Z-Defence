@@ -14,9 +14,11 @@ public class WeaponData : ScriptableObject
     public float fireRate = 0.15f;
     public float impactForce = 30f;
     public float range = 50f;
+    public bool isAutomatic = false;   // Otomatik / Yarý otomatik seçeneði
 
-    [Header("Mermi Yönetimi")]
+    [Header("Mermi & Þarjör Yönetimi")]
     public int magazineSize = 30;
     public int totalAmmoReserve = 90;
+    public float reloadTime = 2.0f;     // Silahtan silaha deðiþen þarjör yenileme süresi (Saniye)
     public bool hasInfiniteAmmo = false;
 }
