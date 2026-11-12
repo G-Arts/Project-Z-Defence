@@ -10,6 +10,7 @@ public abstract class WeaponBase : MonoBehaviour
     public float damage = 20f;
     public float fireRate = 0.15f;
     public float impactForce = 30f;
+    public float range = 50f;
     public bool isAutomatic = false;
 
     [Header("Mermi & Þarjör Yönetimi")]

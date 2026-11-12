@@ -128,6 +128,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Target
   maxHealth: 100
+  goldReward: 10
+  damageToCenter: 10
   targetRenderer: {fileID: 7852725126999034702}
   hitColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.1
@@ -144,8 +146,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombMovement
   moveSpeed: 1
-  stopAtTarget: 1
-  stoppingDistance: 0.2
 --- !u!54 &8862002764803949204
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -154,7 +154,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 637282554920787213}
   serializedVersion: 5
-  m_Mass: 200
+  m_Mass: 10
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}

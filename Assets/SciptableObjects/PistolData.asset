@@ -16,10 +16,12 @@ MonoBehaviour:
   rarity: 0
   weaponIcon: {fileID: 21300000, guid: 433e25d35d3199840a3234bf796dd6c8, type: 3}
   weaponPrefab: {fileID: 4818476601254733916, guid: 1fbbdf3c49d6ffd48b6dd1675dfc3108, type: 3}
-  damage: 20
-  fireRate: 0.15
+  damage: 40
+  fireRate: 0.5
   impactForce: 30
   range: 50
-  magazineSize: 30
-  totalAmmoReserve: 90
+  isAutomatic: 0
+  magazineSize: 15
+  totalAmmoReserve: 60
+  reloadTime: 2
   hasInfiniteAmmo: 1
